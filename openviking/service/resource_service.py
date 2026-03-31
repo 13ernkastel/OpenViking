@@ -11,6 +11,7 @@ import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from openviking.server.identity import RequestContext
+from openviking.server.local_input_guard import is_remote_resource_source, require_remote_resource_source
 from openviking.storage import VikingDBManager
 from openviking.storage.queuefs import get_queue_manager
 from openviking.storage.viking_fs import VikingFS
@@ -29,6 +30,7 @@ from openviking_cli.exceptions import (
     InvalidArgumentError,
     NotInitializedError,
 )
+from openviking.utils.network_guard import ensure_public_remote_target
 from openviking_cli.utils import get_logger
 from openviking_cli.utils.uri import VikingURI
 
@@ -110,6 +112,7 @@ class ResourceService:
         watch_interval: float = 0,
         skip_watch_management: bool = False,
         allow_local_path_resolution: bool = True,
+        enforce_public_remote_targets: bool = False,
         **kwargs,
     ) -> Dict[str, Any]:
         """Add resource to OpenViking (only supports resources scope).
@@ -137,6 +140,8 @@ class ResourceService:
                 creating a new one.
             skip_watch_management: If True, skip watch task management (used by scheduler to
                 avoid recursive watch task creation during scheduled execution)
+            enforce_public_remote_targets: When True, reject non-public remote hosts and
+                validate each outbound HTTP request URL during fetch.
             **kwargs: Extra options forwarded to the parser chain
 
         Returns:
@@ -178,6 +183,9 @@ class ResourceService:
                 raise InvalidArgumentError(
                     "watch_interval > 0 requires 'to' to be specified (target URI to watch)"
                 )
+            if enforce_public_remote_targets and is_remote_resource_source(path):
+                path = require_remote_resource_source(path)
+                kwargs.setdefault("request_validator", ensure_public_remote_target)
 
             result = await self._resource_processor.process_resource(
                 path=path,
