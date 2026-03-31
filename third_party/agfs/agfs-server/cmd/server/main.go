@@ -66,6 +66,7 @@ const sampleConfig = `# AGFS Server Configuration File
 server:
   address: ":8080"          # Server listen address
   log_level: "info"         # Log level: debug, info, warn, error
+  management_api_enabled: false # Set true to allow runtime mount/plugin changes over HTTP
 
 # Plugin configurations
 plugins:
@@ -360,7 +361,13 @@ func main() {
 	// Create handlers
 	handler := handlers.NewHandler(mfs, trafficMonitor)
 	handler.SetVersionInfo(Version, GitCommit, BuildTime)
-	pluginHandler := handlers.NewPluginHandler(mfs)
+	pluginHandler := handlers.NewPluginHandler(mfs, cfg.Server.ManagementAPIEnabled)
+
+	if cfg.Server.ManagementAPIEnabled {
+		log.Warn("AGFS management API enabled: runtime mount and external plugin changes are available over HTTP")
+	} else {
+		log.Info("AGFS management API disabled: runtime mount and external plugin endpoints will return 403")
+	}
 
 	// Setup routes
 	mux := http.NewServeMux()

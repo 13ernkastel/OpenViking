@@ -20,12 +20,29 @@ import (
 
 // PluginHandler handles plugin management operations
 type PluginHandler struct {
-	mfs *mountablefs.MountableFS
+	mfs                  *mountablefs.MountableFS
+	managementAPIEnabled bool
 }
 
 // NewPluginHandler creates a new plugin handler
-func NewPluginHandler(mfs *mountablefs.MountableFS) *PluginHandler {
-	return &PluginHandler{mfs: mfs}
+func NewPluginHandler(mfs *mountablefs.MountableFS, managementAPIEnabled bool) *PluginHandler {
+	return &PluginHandler{
+		mfs:                  mfs,
+		managementAPIEnabled: managementAPIEnabled,
+	}
+}
+
+func (ph *PluginHandler) requireManagementAPI(w http.ResponseWriter) bool {
+	if ph.managementAPIEnabled {
+		return true
+	}
+
+	writeError(
+		w,
+		http.StatusForbidden,
+		"management API is disabled; set server.management_api_enabled=true to allow runtime mount and plugin changes",
+	)
+	return false
 }
 
 // MountInfo represents information about a mounted plugin
@@ -42,6 +59,10 @@ type ListMountsResponse struct {
 
 // ListMounts handles GET /mounts
 func (ph *PluginHandler) ListMounts(w http.ResponseWriter, r *http.Request) {
+	if !ph.requireManagementAPI(w) {
+		return
+	}
+
 	mounts := ph.mfs.GetMounts()
 
 	var mountInfos []MountInfo
@@ -63,6 +84,10 @@ type UnmountRequest struct {
 
 // Unmount handles POST /unmount
 func (ph *PluginHandler) Unmount(w http.ResponseWriter, r *http.Request) {
+	if !ph.requireManagementAPI(w) {
+		return
+	}
+
 	var req UnmountRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
@@ -91,6 +116,10 @@ type MountRequest struct {
 
 // Mount handles POST /mount
 func (ph *PluginHandler) Mount(w http.ResponseWriter, r *http.Request) {
+	if !ph.requireManagementAPI(w) {
+		return
+	}
+
 	var req MountRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
@@ -248,6 +277,10 @@ func (ph *PluginHandler) readPluginFromAGFS(agfsPath string) (string, error) {
 
 // LoadPlugin handles POST /plugins/load
 func (ph *PluginHandler) LoadPlugin(w http.ResponseWriter, r *http.Request) {
+	if !ph.requireManagementAPI(w) {
+		return
+	}
+
 	var req LoadPluginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
@@ -316,6 +349,10 @@ type UnloadPluginRequest struct {
 
 // UnloadPlugin handles POST /plugins/unload
 func (ph *PluginHandler) UnloadPlugin(w http.ResponseWriter, r *http.Request) {
+	if !ph.requireManagementAPI(w) {
+		return
+	}
+
 	var req UnloadPluginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
@@ -357,6 +394,10 @@ type ListPluginsResponse struct {
 
 // ListPlugins handles GET /plugins
 func (ph *PluginHandler) ListPlugins(w http.ResponseWriter, r *http.Request) {
+	if !ph.requireManagementAPI(w) {
+		return
+	}
+
 	// Get all mounts
 	mounts := ph.mfs.GetMounts()
 

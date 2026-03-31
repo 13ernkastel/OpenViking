@@ -116,6 +116,7 @@ The server is configured using a YAML file (default: `config.yaml`).
 server:
   address: ":8080"
   log_level: info  # debug, info, warn, error
+  management_api_enabled: false  # Enable only on trusted/admin-only networks
 
 # External plugins configuration
 external_plugins:
@@ -191,6 +192,8 @@ AGFS Server comes with a rich set of built-in plugins.
 
 You can mount, unmount, and manage plugins at runtime using the API.
 
+This management surface is disabled by default. To enable it, set `server.management_api_enabled: true` in `config.yaml` and only expose the server on a trusted admin network.
+
 **Mount a plugin**:
 ```bash
 curl -X POST http://localhost:8080/api/v1/mount \
@@ -245,12 +248,12 @@ All API endpoints are prefixed with `/api/v1/`.
 | | `GET` | `/stat` | Get file metadata |
 | **Directories** | `GET` | `/directories` | List directory contents |
 | | `POST` | `/directories` | Create directory |
-| **Management** | `GET` | `/mounts` | List active mounts |
-| | `POST` | `/mount` | Mount a plugin |
-| | `POST` | `/unmount` | Unmount a plugin |
-| | `GET` | `/plugins` | List loaded external plugins |
-| | `POST` | `/plugins/load` | Load an external plugin |
-| | `POST` | `/plugins/unload` | Unload an external plugin |
+| **Management** | `GET` | `/mounts` | List active mounts, when `server.management_api_enabled=true` |
+| | `POST` | `/mount` | Mount a plugin, when `server.management_api_enabled=true` |
+| | `POST` | `/unmount` | Unmount a plugin, when `server.management_api_enabled=true` |
+| | `GET` | `/plugins` | List loaded external plugins, when `server.management_api_enabled=true` |
+| | `POST` | `/plugins/load` | Load an external plugin, when `server.management_api_enabled=true` |
+| | `POST` | `/plugins/unload` | Unload an external plugin, when `server.management_api_enabled=true` |
 | **System** | `GET` | `/health` | Server health check |
 
 ## Development

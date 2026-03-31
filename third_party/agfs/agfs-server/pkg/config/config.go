@@ -16,8 +16,9 @@ type Config struct {
 
 // ServerConfig contains server-level configuration
 type ServerConfig struct {
-	Address  string `yaml:"address"`
-	LogLevel string `yaml:"log_level"`
+	Address              string `yaml:"address"`
+	LogLevel             string `yaml:"log_level"`
+	ManagementAPIEnabled bool   `yaml:"management_api_enabled"`
 }
 
 // ExternalPluginsConfig contains configuration for external plugins

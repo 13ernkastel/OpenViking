@@ -3,6 +3,7 @@
 server:
   address: ":8080"
   log_level: info # Options: debug, info, warn, error
+  management_api_enabled: false # Set true only on trusted/admin-only networks
 
 plugins:
   serverinfofs:

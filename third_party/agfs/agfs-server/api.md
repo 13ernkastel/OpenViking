@@ -323,6 +323,8 @@ curl -X POST "http://localhost:8080/api/v1/chmod?path=/memfs/data.txt" \
 ### List Mounts
 List all currently mounted plugins.
 
+This endpoint is available only when `server.management_api_enabled=true`.
+
 **Endpoint:** `GET /api/v1/mounts`
 
 **Response:**
@@ -345,6 +347,8 @@ curl "http://localhost:8080/api/v1/mounts"
 
 ### Mount Plugin
 Mount a new plugin instance.
+
+This endpoint is available only when `server.management_api_enabled=true`.
 
 **Endpoint:** `POST /api/v1/mount`
 
@@ -388,6 +392,8 @@ curl -X POST "http://localhost:8080/api/v1/unmount" \
 ### List Plugins
 List all available (loaded) plugins, including external ones.
 
+This endpoint is available only when `server.management_api_enabled=true`.
+
 **Endpoint:** `GET /api/v1/plugins`
 
 **Response:**
@@ -416,6 +422,8 @@ curl "http://localhost:8080/api/v1/plugins"
 ### Load External Plugin
 Load a dynamic library plugin (.so/.dylib/.dll) or WASM plugin.
 
+This endpoint is available only when `server.management_api_enabled=true`.
+
 **Endpoint:** `POST /api/v1/plugins/load`
 
 **Body:**
@@ -435,6 +443,8 @@ curl -X POST "http://localhost:8080/api/v1/plugins/load" \
 
 ### Unload External Plugin
 Unload a previously loaded external plugin.
+
+This endpoint is available only when `server.management_api_enabled=true`.
 
 **Endpoint:** `POST /api/v1/plugins/unload`
 
