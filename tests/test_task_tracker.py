@@ -110,6 +110,44 @@ def test_list_filter_by_resource_id(tracker: TaskTracker):
     assert tasks[0].resource_id == "s1"
 
 
+def test_get_hides_task_from_other_owner(tracker: TaskTracker):
+    task = tracker.create(
+        "session_commit",
+        resource_id="s1",
+        owner_account_id="acme",
+        owner_user_id="alice",
+    )
+
+    assert (
+        tracker.get(
+            task.task_id,
+            owner_account_id="acme",
+            owner_user_id="bob",
+        )
+        is None
+    )
+
+
+def test_list_tasks_filters_by_owner(tracker: TaskTracker):
+    tracker.create(
+        "session_commit",
+        resource_id="alice-task",
+        owner_account_id="acme",
+        owner_user_id="alice",
+    )
+    tracker.create(
+        "session_commit",
+        resource_id="bob-task",
+        owner_account_id="acme",
+        owner_user_id="bob",
+    )
+
+    tasks = tracker.list_tasks(owner_account_id="acme", owner_user_id="alice")
+
+    assert len(tasks) == 1
+    assert tasks[0].resource_id == "alice-task"
+
+
 def test_list_limit(tracker: TaskTracker):
     for i in range(10):
         tracker.create("session_commit", resource_id=f"s{i}")
@@ -153,17 +191,43 @@ def test_has_running_false_after_fail(tracker: TaskTracker):
     assert tracker.has_running("session_commit", "s1") is False
 
 
+def test_create_if_no_running_isolated_by_owner(tracker: TaskTracker):
+    alice_task = tracker.create_if_no_running(
+        "reindex",
+        "viking://resources/demo",
+        owner_account_id="acme",
+        owner_user_id="alice",
+    )
+    bob_task = tracker.create_if_no_running(
+        "reindex",
+        "viking://resources/demo",
+        owner_account_id="acme",
+        owner_user_id="bob",
+    )
+
+    assert alice_task is not None
+    assert bob_task is not None
+    assert alice_task.task_id != bob_task.task_id
+
+
 # ── Serialization ──
 
 
 def test_to_dict(tracker: TaskTracker):
-    task = tracker.create("session_commit", resource_id="s1")
+    task = tracker.create(
+        "session_commit",
+        resource_id="s1",
+        owner_account_id="acme",
+        owner_user_id="alice",
+    )
     d = task.to_dict()
     assert d["task_id"] == task.task_id
     assert d["status"] == "pending"
     assert d["task_type"] == "session_commit"
     assert d["resource_id"] == "s1"
     assert isinstance(d["created_at"], float)
+    assert "owner_account_id" not in d
+    assert "owner_user_id" not in d
 
 
 # ── Sanitization ──
