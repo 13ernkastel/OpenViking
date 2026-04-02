@@ -162,7 +162,7 @@ async def test_add_resource_forwards_tags_to_service(
     )
 
     assert resp.status_code == 200
-    assert captured["tags"] == ["machine-learning", "feature-store"]
+    assert captured["tags"] == ["user:machine-learning", "user:feature-store"]
 
 
 async def test_add_resource_with_summary_only_telemetry(

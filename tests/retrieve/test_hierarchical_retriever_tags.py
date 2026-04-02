@@ -56,7 +56,7 @@ class TagExpansionStorage:
                 "_score": 0.9,
                 "level": 1,
                 "context_type": "resource",
-                "tags": ["model-training"],
+                "tags": ["auto:model-training"],
             }
         ]
 
@@ -88,7 +88,7 @@ class TagExpansionStorage:
                 "abstract": "Feature store guidance for model training",
                 "level": 2,
                 "context_type": "resource",
-                "tags": ["model-training", "feature-store"],
+                "tags": ["auto:model-training", "auto:feature-store"],
             }
         ]
 
@@ -113,7 +113,7 @@ class TagExpansionStorage:
                     "_score": 0.95,
                     "level": 2,
                     "context_type": "resource",
-                    "tags": ["model-training", "feature-store"],
+                    "tags": ["auto:model-training", "auto:feature-store"],
                 }
             ]
         return []
@@ -171,7 +171,7 @@ class ExplicitTagStorage(TagExpansionStorage):
                 "abstract": "Microservice architecture patterns",
                 "level": 2,
                 "context_type": "resource",
-                "tags": ["microservice"],
+                "tags": ["auto:microservice"],
             }
         ]
 
@@ -196,7 +196,7 @@ class ExplicitTagStorage(TagExpansionStorage):
                     "_score": 0.88,
                     "level": 2,
                     "context_type": "resource",
-                    "tags": ["microservice"],
+                    "tags": ["auto:microservice"],
                 }
             ]
         return []
@@ -227,7 +227,7 @@ async def test_retrieve_expands_related_subtree_from_global_hit_tags():
     )
 
     assert storage.tag_search_calls
-    assert storage.tag_search_calls[0]["tags"] == ["model-training"]
+    assert storage.tag_search_calls[0]["tags"] == ["auto:model-training"]
     assert "viking://resources/data-engineering" in storage.child_search_calls
     assert [ctx.uri for ctx in result.matched_contexts] == [
         "viking://resources/data-engineering/feature-store.md"
@@ -251,9 +251,9 @@ async def test_retrieve_uses_explicit_tags_when_global_search_returns_nothing():
     )
 
     assert storage.global_search_calls
-    assert storage.global_search_calls[0]["tags"] == ["microservice"]
+    assert storage.global_search_calls[0]["tags"] == ["user:microservice", "auto:microservice"]
     assert storage.tag_search_calls
-    assert storage.tag_search_calls[0]["tags"] == ["microservice"]
+    assert storage.tag_search_calls[0]["tags"] == ["user:microservice", "auto:microservice"]
     assert [ctx.uri for ctx in result.matched_contexts] == [
         "viking://resources/architecture/microservices.md"
     ]

@@ -15,7 +15,12 @@ from openviking.server.identity import RequestContext
 from openviking.storage.queuefs import get_queue_manager
 from openviking.storage.queuefs.embedding_msg_converter import EmbeddingMsgConverter
 from openviking.storage.viking_fs import get_viking_fs
-from openviking.utils.tag_utils import extract_context_tags, merge_tags, parse_tags
+from openviking.utils.tag_utils import (
+    AUTO_TAG_NAMESPACE,
+    extract_context_tags,
+    merge_tags,
+    parse_tags,
+)
 from openviking_cli.utils import VikingURI, get_logger
 from openviking_cli.utils.config import get_openviking_config
 
@@ -246,7 +251,10 @@ async def vectorize_file(
 
         file_name = summary_dict.get("name") or os.path.basename(file_path)
         summary = summary_dict.get("summary", "")
-        summary_tags = parse_tags(summary_dict.get("tags"))
+        summary_tags = parse_tags(
+            summary_dict.get("tags"),
+            default_namespace=AUTO_TAG_NAMESPACE,
+        )
         resolved_tags = extract_context_tags(
             file_path,
             texts=[summary, file_name],

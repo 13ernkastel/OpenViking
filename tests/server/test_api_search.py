@@ -86,7 +86,12 @@ async def test_find_forwards_tags_to_service(client_with_resource, service, monk
     )
 
     assert resp.status_code == 200
-    assert captured["tags"] == ["machine-learning", "feature-store"]
+    assert captured["tags"] == [
+        "user:machine-learning",
+        "auto:machine-learning",
+        "user:feature-store",
+        "auto:feature-store",
+    ]
 
 
 async def test_search_forwards_tags_to_service(client, service, monkeypatch):
@@ -109,7 +114,12 @@ async def test_search_forwards_tags_to_service(client, service, monkeypatch):
     )
 
     assert resp.status_code == 200
-    assert captured["tags"] == ["machine-learning", "feature-store"]
+    assert captured["tags"] == [
+        "user:machine-learning",
+        "auto:machine-learning",
+        "user:feature-store",
+        "auto:feature-store",
+    ]
 
 
 async def test_search_basic(client_with_resource):

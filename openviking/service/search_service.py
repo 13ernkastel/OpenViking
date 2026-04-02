@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from openviking.server.identity import RequestContext
 from openviking.storage.viking_fs import VikingFS
+from openviking.utils.tag_utils import expand_query_tags
 from openviking_cli.exceptions import NotInitializedError
 from openviking_cli.utils import get_logger
 
@@ -60,6 +61,7 @@ class SearchService:
             FindResult
         """
         viking_fs = self._ensure_initialized()
+        tags = expand_query_tags(tags)
 
         session_info = None
         if session:
@@ -100,6 +102,7 @@ class SearchService:
             FindResult
         """
         viking_fs = self._ensure_initialized()
+        tags = expand_query_tags(tags)
         result = await viking_fs.find(
             query=query,
             ctx=ctx,

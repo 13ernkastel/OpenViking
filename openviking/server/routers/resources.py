@@ -20,7 +20,7 @@ from openviking.server.local_input_guard import (
 from openviking.server.models import Response
 from openviking.server.telemetry import run_operation
 from openviking.telemetry import TelemetryRequest
-from openviking.utils.tag_utils import parse_tags
+from openviking.utils.tag_utils import canonicalize_user_tags
 from openviking_cli.exceptions import InvalidArgumentError
 from openviking_cli.utils.config.open_viking_config import get_openviking_config
 
@@ -214,7 +214,7 @@ async def add_resource(
             instruction=request.instruction,
             wait=request.wait,
             timeout=request.timeout,
-            tags=parse_tags(request.tags),
+            tags=canonicalize_user_tags(request.tags),
             allow_local_path_resolution=allow_local_path_resolution,
             **kwargs,
         ),

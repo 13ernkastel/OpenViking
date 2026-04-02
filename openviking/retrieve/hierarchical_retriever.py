@@ -21,7 +21,7 @@ from openviking.server.identity import RequestContext, Role
 from openviking.storage import VikingDBManager, VikingDBManagerProxy
 from openviking.storage.viking_fs import get_viking_fs
 from openviking.telemetry import get_current_telemetry
-from openviking.utils.tag_utils import merge_tags, parse_tags
+from openviking.utils.tag_utils import expand_query_tags, merge_tags, parse_tags
 from openviking.utils.time_utils import parse_iso_datetime
 from openviking_cli.retrieve.types import (
     ContextType,
@@ -117,7 +117,7 @@ class HierarchicalRetriever:
         vector_proxy = VikingDBManagerProxy(self.vector_store, ctx)
 
         target_dirs = [d for d in (query.target_directories or []) if d]
-        query_tags = parse_tags(query.tags)
+        query_tags = expand_query_tags(query.tags)
 
         if not await vector_proxy.collection_exists_bound():
             logger.warning(

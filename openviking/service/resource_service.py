@@ -15,6 +15,7 @@ from openviking.storage import VikingDBManager
 from openviking.storage.queuefs import get_queue_manager
 from openviking.storage.viking_fs import VikingFS
 from openviking.telemetry import get_current_telemetry
+from openviking.utils.tag_utils import canonicalize_user_tags
 from openviking.telemetry.resource_summary import (
     build_queue_status_payload,
     record_resource_wait_metrics,
@@ -160,6 +161,7 @@ class ResourceService:
         telemetry.set("resource.flags.build_index", build_index)
         telemetry.set("resource.flags.summarize", summarize)
         telemetry.set("resource.flags.watch_enabled", watch_enabled)
+        tags = canonicalize_user_tags(tags)
 
         try:
             # add_resource only supports resources scope
