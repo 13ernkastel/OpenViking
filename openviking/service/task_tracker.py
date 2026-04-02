@@ -187,16 +187,24 @@ class TaskTracker:
             return False
         return True
 
+    @staticmethod
+    def _validate_owner(owner_account_id: str, owner_user_id: str) -> None:
+        """Reject ownerless task creation for user-originated background work."""
+        if not owner_account_id or not owner_user_id:
+            raise ValueError("Task ownership requires non-empty owner_account_id and owner_user_id")
+
     # ── CRUD ──
 
     def create(
         self,
         task_type: str,
         resource_id: Optional[str] = None,
-        owner_account_id: Optional[str] = None,
-        owner_user_id: Optional[str] = None,
+        *,
+        owner_account_id: str,
+        owner_user_id: str,
     ) -> TaskRecord:
         """Register a new pending task. Returns a snapshot copy."""
+        self._validate_owner(owner_account_id, owner_user_id)
         task = TaskRecord(
             task_id=str(uuid4()),
             task_type=task_type,
@@ -218,14 +226,16 @@ class TaskTracker:
         self,
         task_type: str,
         resource_id: str,
-        owner_account_id: Optional[str] = None,
-        owner_user_id: Optional[str] = None,
+        *,
+        owner_account_id: str,
+        owner_user_id: str,
     ) -> Optional[TaskRecord]:
         """Atomically check for running tasks and create a new one if none exist.
 
         Returns TaskRecord on success, None if a running task already exists.
         This eliminates the race condition between has_running() and create().
         """
+        self._validate_owner(owner_account_id, owner_user_id)
         with self._lock:
             # Check for existing running tasks
             has_active = any(
